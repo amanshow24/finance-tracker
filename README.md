@@ -124,5 +124,5 @@ This project is licensed under the MIT License. See the [LICENSE.md](LICENSE.md)
 ## Contact
 
 For questions, feedback, or support, please contact:
-- Email: [your-email@example.com]
+- Email: [amanshow9800@gmail.com]
 - GitHub: [amanshow24](https://github.com/amanshow24)
