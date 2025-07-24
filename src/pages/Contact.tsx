@@ -151,7 +151,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <p className="font-medium">Email</p>
-                      <p className="text-muted-foreground">support@financetracker.com</p>
+                      <p className="text-muted-foreground">amanshow9800@gmail.com</p>
                     </div>
                   </div>
 
@@ -161,7 +161,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <p className="font-medium">GitHub</p>
-                      <p className="text-muted-foreground">github.com/financetracker</p>
+                      <p className="text-muted-foreground">github.com/amanshow24</p>
                     </div>
                   </div>
 
@@ -171,7 +171,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <p className="font-medium">LinkedIn</p>
-                      <p className="text-muted-foreground">linkedin.com/company/financetracker</p>
+                      <p className="text-muted-foreground">linkedin.com/in/aman-kumar-show-a5589b290/</p>
                     </div>
                   </div>
                 </CardContent>
@@ -215,23 +215,23 @@ export default function Contact() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
               <h3 className="text-xl font-bold text-foreground mb-2">Finance Tracker</h3>
-              <p className="text-muted-foreground">© 2024 Finance Tracker. All rights reserved.</p>
+              <p className="text-muted-foreground">© 2025 Finance Tracker. All rights reserved.</p>
             </div>
             <div className="flex flex-wrap gap-6">
               <a href="/" className="text-muted-foreground hover:text-foreground">Home</a>
               <a href="/contact" className="text-muted-foreground hover:text-foreground">Contact</a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">Privacy</a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">Terms</a>
+              <a href="/contact" className="text-muted-foreground hover:text-foreground">Privacy</a>
+              <a href="/contact" className="text-muted-foreground hover:text-foreground">Terms</a>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border flex justify-center space-x-6">
-            <a href="#" className="text-muted-foreground hover:text-foreground">
+            <a href="https://github.com/amanshow24" className="text-muted-foreground hover:text-foreground">
               <Github className="h-5 w-5" />
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground">
+            <a href="https://www.linkedin.com/in/aman-kumar-show-a5589b290" className="text-muted-foreground hover:text-foreground">
               <Linkedin className="h-5 w-5" />
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground">
+            <a href="malito:amanshow9800@gmail.com" className="text-muted-foreground hover:text-foreground">
               <Mail className="h-5 w-5" />
             </a>
           </div>

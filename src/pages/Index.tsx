@@ -76,15 +76,17 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
               <h3 className="text-xl font-bold text-foreground mb-2">Finance Tracker</h3>
-              <p className="text-muted-foreground">© 2024 Finance Tracker. All rights reserved.</p>
+              <p className="text-muted-foreground">© 2025 Finance Tracker. All rights reserved.</p>
             </div>
             <div className="flex flex-wrap gap-6">
               <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
               <Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
-              <a href="#" className="text-muted-foreground hover:text-foreground">Privacy</a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">Terms</a>
+              <a href="/contact" className="text-muted-foreground hover:text-foreground">Privacy</a>
+              <a href="/contact" className="text-muted-foreground hover:text-foreground">Terms</a>
             </div>
           </div>
+          
+
         </div>
       </footer>
     </div>
