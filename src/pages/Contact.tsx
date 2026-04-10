@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch } from '@/lib/api';
 import { Mail, Github, Linkedin, Send } from 'lucide-react';
 
 export default function Contact() {
@@ -31,20 +31,21 @@ export default function Contact() {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
+      const response = await apiFetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           message: formData.message,
-        });
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(response.data?.error || response.error?.message || 'Failed to send message.');
       }
 
       toast({
-        title: "Success!",
+        title: 'Success!',
         description: "Your message has been sent successfully. We'll get back to you soon!",
       });
 

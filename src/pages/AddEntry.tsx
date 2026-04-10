@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch } from '@/lib/api';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -44,9 +44,9 @@ export default function AddEntry() {
     
     if (!formData.title || !formData.amount || !formData.category) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -54,28 +54,27 @@ export default function AddEntry() {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('finance_entries')
-        .insert({
-          user_id: user.id,
-          type: formData.type,
+      const response = await apiFetch('/api/entries', {
+        method: 'POST',
+        body: JSON.stringify({
           title: formData.title,
+          type: formData.type,
           amount: parseFloat(formData.amount),
           category: formData.category,
           date: format(formData.date, 'yyyy-MM-dd'),
           notes: formData.notes || null,
-        });
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(response.data?.error || response.error?.message || 'Failed to add entry.');
       }
 
       toast({
-        title: "Success!",
-        description: "Entry added successfully.",
+        title: 'Success!',
+        description: 'Entry added successfully.',
       });
 
-      // Reset form
       setFormData({
         type: 'expense',
         title: '',
@@ -85,13 +84,12 @@ export default function AddEntry() {
         notes: '',
       });
 
-      // Navigate to dashboard
       navigate('/dashboard');
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add entry.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add entry.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -110,7 +108,6 @@ export default function AddEntry() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Type Selection */}
               <div className="space-y-3">
                 <Label>Type</Label>
                 <RadioGroup
@@ -131,7 +128,6 @@ export default function AddEntry() {
                 </RadioGroup>
               </div>
 
-              {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
@@ -143,7 +139,6 @@ export default function AddEntry() {
                 />
               </div>
 
-              {/* Amount */}
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount (₹) *</Label>
                 <Input
@@ -158,7 +153,6 @@ export default function AddEntry() {
                 />
               </div>
 
-              {/* Category */}
               <div className="space-y-2">
                 <Label>Category *</Label>
                 <Select
@@ -178,7 +172,6 @@ export default function AddEntry() {
                 </Select>
               </div>
 
-              {/* Date */}
               <div className="space-y-2">
                 <Label>Date *</Label>
                 <Popover>
@@ -186,12 +179,12 @@ export default function AddEntry() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.date && "text-muted-foreground"
+                        'w-full justify-start text-left font-normal',
+                        !formData.date && 'text-muted-foreground'
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.date ? format(formData.date, "PPP") : <span>Pick a date</span>}
+                      {formData.date ? format(formData.date, 'PPP') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -206,7 +199,6 @@ export default function AddEntry() {
                 </Popover>
               </div>
 
-              {/* Notes */}
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
@@ -220,7 +212,7 @@ export default function AddEntry() {
 
               <div className="flex space-x-4">
                 <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? "Adding..." : "Add Entry"}
+                  {loading ? 'Adding...' : 'Add Entry'}
                 </Button>
                 <Button
                   type="button"

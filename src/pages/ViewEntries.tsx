@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch, normalizeEntry } from '@/lib/api';
 import { Edit, Trash2, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -64,18 +64,13 @@ export default function ViewEntries() {
   const fetchEntries = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('finance_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching entries:', error);
+    const response = await apiFetch('/api/entries');
+    if (!response.ok) {
+      console.error('Error fetching entries:', response.data?.error || response.error?.message);
       return;
     }
 
-    setEntries(data || []);
+    setEntries((response.data?.entries || []).map(normalizeEntry));
   };
 
   const filterEntries = () => {
@@ -112,28 +107,28 @@ export default function ViewEntries() {
   const handleSaveEdit = async () => {
     if (!editingEntry) return;
 
-    const { error } = await supabase
-      .from('finance_entries')
-      .update({
+    const response = await apiFetch(`/api/entries/${editingEntry.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
         title: editForm.title,
         amount: parseFloat(editForm.amount),
         category: editForm.category,
         notes: editForm.notes || null,
-      })
-      .eq('id', editingEntry.id);
+      }),
+    });
 
-    if (error) {
+    if (!response.ok) {
       toast({
-        title: "Error",
-        description: "Failed to update entry.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update entry.',
+        variant: 'destructive',
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Entry updated successfully.",
+      title: 'Success',
+      description: 'Entry updated successfully.',
     });
 
     setEditingEntry(null);
@@ -141,23 +136,22 @@ export default function ViewEntries() {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('finance_entries')
-      .delete()
-      .eq('id', id);
+    const response = await apiFetch(`/api/entries/${id}`, {
+      method: 'DELETE',
+    });
 
-    if (error) {
+    if (!response.ok) {
       toast({
-        title: "Error",
-        description: "Failed to delete entry.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete entry.',
+        variant: 'destructive',
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Entry deleted successfully.",
+      title: 'Success',
+      description: 'Entry deleted successfully.',
     });
 
     fetchEntries();

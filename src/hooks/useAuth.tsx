@@ -1,81 +1,108 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch } from '@/lib/api';
+
+interface UserType {
+  id: string;
+  email: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: UserType | null;
+  isLoading: boolean;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const restoreSession = async () => {
+      const token = localStorage.getItem('finance-tracker-token');
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        return;
       }
-    );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
+      const response = await apiFetch('/api/auth/me');
+      if (response.ok && response.data?.user) {
+        setUser(response.data.user);
+      } else {
+        localStorage.removeItem('finance-tracker-token');
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
 
-    return () => subscription.unsubscribe();
+    restoreSession();
   }, []);
 
+  const saveSession = (user: UserType, token: string) => {
+    localStorage.setItem('finance-tracker-token', token);
+    setUser(user);
+  };
+
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl
+    try {
+      const response = await apiFetch('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok && response.data) {
+        saveSession(response.data.user, response.data.token);
+        return { error: null };
       }
-    });
-    return { error };
+
+      return {
+        error: { message: response.data?.error || response.error?.message || 'Failed to sign up' },
+      };
+    } catch (exception: any) {
+      return {
+        error: { message: exception?.message || 'Failed to sign up' },
+      };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const response = await apiFetch('/api/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok && response.data) {
+        saveSession(response.data.user, response.data.token);
+        return { error: null };
+      }
+
+      return {
+        error: { message: response.data?.error || response.error?.message || 'Failed to sign in' },
+      };
+    } catch (exception: any) {
+      return {
+        error: { message: exception?.message || 'Failed to sign in' },
+      };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
-    });
-    return { error };
+    localStorage.removeItem('finance-tracker-token');
+    setUser(null);
   };
 
   return (
     <AuthContext.Provider value={{
       user,
-      session,
+      isLoading,
       signUp,
       signIn,
       signOut,
-      signInWithGoogle,
     }}>
       {children}
     </AuthContext.Provider>

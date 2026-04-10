@@ -5,7 +5,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch, normalizeEntry } from '@/lib/api';
 import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
 
 interface FinanceEntry {
@@ -50,22 +50,16 @@ export default function Dashboard() {
     const startDate = `${selectedMonth}-01`;
     const endDate = `${selectedMonth}-31`;
 
-    const { data, error } = await supabase
-      .from('finance_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching entries:', error);
+    const response = await apiFetch(`/api/entries?start=${startDate}&end=${endDate}`);
+    if (!response.ok) {
+      console.error('Error fetching entries:', response.data?.error || response.error?.message);
       return;
     }
 
-    setEntries(data || []);
-    calculateSummary(data || []);
-    calculateCategoryData(data || []);
+    const entriesData = (response.data?.entries || []).map(normalizeEntry);
+    setEntries(entriesData);
+    calculateSummary(entriesData);
+    calculateCategoryData(entriesData);
   };
 
   const calculateSummary = (entries: FinanceEntry[]) => {

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch, normalizeEntry } from '@/lib/api';
 import { Download, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
 import { CSVLink } from 'react-csv';
@@ -63,20 +63,14 @@ export default function Reports() {
     const startDate = `${selectedMonth}-01`;
     const endDate = `${selectedMonth}-31`;
 
-    const { data, error } = await supabase
-      .from('finance_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching entries:', error);
+    const response = await apiFetch(`/api/entries?start=${startDate}&end=${endDate}`);
+    if (!response.ok) {
+      console.error('Error fetching entries:', response.data?.error || response.error?.message);
       return;
     }
 
-    setEntries(data || []);
+    const entriesData = (response.data?.entries || []).map(normalizeEntry);
+    setEntries(entriesData);
   };
 
   const calculateMonthlySummary = () => {

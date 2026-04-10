@@ -48,7 +48,10 @@ export function Layout({ children }: LayoutProps) {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/', { replace: true });
+    if (window.location.pathname !== '/') {
+      window.location.replace('/');
+    }
   };
 
   const getUserInitials = () => {
@@ -114,6 +117,17 @@ export function Layout({ children }: LayoutProps) {
                   <p className="text-sm text-muted-foreground truncate w-full">
                     {user?.email}
                   </p>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link className="flex-col items-start gap-1 py-3" to="/profile">
+                    <div className="flex items-center text-sm font-medium">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Manage your expenses, income, and reports from this account.
+                    </p>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
